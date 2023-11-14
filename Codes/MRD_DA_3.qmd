@@ -1,27 +1,73 @@
 ---
-title: "Data Analysis Assignment 03"
+title: "Analytics Assignment 3: GLM - Multinomial Regression"
 author: "Revanth Chowdary Ganga (rg361)"
-format: html
+format: pdf
 editor: visual
+echo: FALSE
+output: FALSE
+geometry: margin = 1.0cm
 ---
 
-## Quarto
-
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
-```{r}
-1 + 1
+```{r, warning=FALSE, message=FALSE}
+#Loading Required Packages and Libraries
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(openintro)
+library(gtsummary)
+library(caret)
+library(pROC)
+library(stargazer)
+library(cvms)
+library(gridExtra)
+library(ggpubr)
 ```
 
-You can add options to executable code like this
-
 ```{r}
-#| echo: false
-2 * 2
+#Loading the Data
+df <- read.csv("https://anlane611.github.io/ids702-fall23/DAA/DA3_Multinomial.csv")
+
+#Use Below load in case online load is not working
+#df <- read.csv("../Resources/DA3_Multinomial.csv")
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+```{r}
+summary(df)
+```
+
+# 1. Introduction
+
+## 1.1 Generalized Linear Models
+
+Generalized Linear Models (GLMs) are a class of statistical models that extend linear regression to handle a broader range of response variable distributions such as binomial, Poisson, and gamma, making them suitable for diverse types of data. Unlike traditional linear regression, GLMs are not constrained by the assumption of normality.
+
+The Primary components of a GLM are:
+
+1.  **Response Variable**: with a distribution such as Binomial, Poisson etc.
+2.  **Linear Predictor**: A Linear combination of the predictor variables (similar to Linear Regression)
+3.  **Link Function**: to connect the linear predictor to the expected value of the response variable.
+
+The General form of a GLM is:
+
+$$
+g(μ) = β_0 + β_1X_1 + β_2X_2 + ... + β_kX_k
+$$
+
+Where $g(\mu)$ is the link function, $\beta_i$ are the coefficients associated with the corresponding predictor variables $X_i$
+
+## 1.2 Link Function
+
+A link function is used to connect the linear predictor to the expected value of the response variable i.e. it describes how the mean of the response variable is related to a linear combination of the predictor variables. The link function, denoted as g($\mu$), transforms the linear predictor into a scale appropriate for the response variable. The choice of the link function depends on the nature of the response variable and the distribution assumed for it some examples of link funtions are **Logit, Inverse, Log** etc.
+
+## 1.3 GLM: Multinominal Regression
+
+Multinominal Regression is used when the response variable is categorical in nature and has more than 2 levels (categories). The link function used in Multinominal Regression is a **Logit** function which is represented as follows:
+
+$$logit(p) = log(\frac{p}{1 - p})$$
+
+some sample research questions which can be answered by multinominal include:
+
+1.  What Occupation are people most likely to chose based on their parents occupation and their own education
+2.  What food preferences will an animal have based on its size and habitat
+
+# 2. Probability Distribution
