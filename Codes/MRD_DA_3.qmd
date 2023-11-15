@@ -59,15 +59,39 @@ Where $g(\mu)$ is the link function, $\beta_i$ are the coefficients associated w
 
 A link function is used to connect the linear predictor to the expected value of the response variable i.e. it describes how the mean of the response variable is related to a linear combination of the predictor variables. The link function, denoted as g($\mu$), transforms the linear predictor into a scale appropriate for the response variable. The choice of the link function depends on the nature of the response variable and the distribution assumed for it some examples of link funtions are **Logit, Inverse, Log** etc.
 
-## 1.3 GLM: Multinominal Regression
+## 1.3 GLM: Multinomial Regression
 
-Multinominal Regression is used when the response variable is categorical in nature and has more than 2 levels (categories). The link function used in Multinominal Regression is a **Logit** function which is represented as follows:
+Multinomial Regression is used when the response variable is categorical in nature and has more than 2 levels (categories). The link function used in Multinominal Regression is a **Logit** function which is defined as follows:
 
 $$logit(p) = log(\frac{p}{1 - p})$$
 
-some sample research questions which can be answered by multinominal include:
+some sample research questions which can be answered by multinomial regression include:
 
 1.  What Occupation are people most likely to chose based on their parents occupation and their own education
 2.  What food preferences will an animal have based on its size and habitat
 
 # 2. Probability Distribution
+
+## 2.1 Assumed Probability Distribution
+
+Multinomial distribution assumes that the response variable has a multinomial distribution, which is a generalization of the binomial distribution for categorical variables with more than 2 categories.
+
+The Probability Mass Function of a multinomial distribution is given by the equation:
+
+$$Pr(X_1 = x_1 and ... and X_k = x_k) = \frac{n!}{x_1!...x_k!}p_1^{x_1}...p_k^{x_k}$$
+
+where n is the total number of observations or trails, $x_i$ is the counts for each category and $p_i$ are the probabilities for each category.
+
+## 2.2 Support
+
+The **Support** for multinomial regression is given by:
+
+$$
+x_i\,\epsilon\{0,..,n\}, i\,\epsilon\{1,..,k\}, with\: \sum\limits_i x_i=n
+$$
+
+This implies that the number of times each outcome $x_i$ can occur is in the range 0 and the total number of observations n, and the sum of the count of all outcomes should add up to the total number of observations. k is the total number of possible categories of the outcome variable.
+
+## 2.3 Parameters
+
+The parameters for multinomial regression are that the number of trials "n" should be greater than 0 and the number of mutually exclusive events "k" should be greater than 0 with the probabilities of these events occurring $p_i$ adding upto 1 $(\sum\limits_i p_i=1)$
