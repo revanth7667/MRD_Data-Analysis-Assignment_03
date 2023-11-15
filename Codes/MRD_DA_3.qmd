@@ -94,4 +94,40 @@ This implies that the number of times each outcome $x_i$ can occur is in the ran
 
 ## 2.3 Parameters
 
-The parameters for multinomial regression are that the number of trials "n" should be greater than 0 and the number of mutually exclusive events "k" should be greater than 0 with the probabilities of these events occurring $p_i$ adding upto 1 $(\sum\limits_i p_i=1)$
+The parameters for multinomial regression are that the number of trials "n" should be greater than 0 and the number of mutually exclusive events "k" should be greater than 0 with the probabilities of these events occurring $p_i$ taking values between 0 and 1 and sum of these probabilities should add up to 1 $(\sum\limits_i p_i=1)$
+
+## 2.4 Example
+
+Example if we try to predict the chances of picking a shape out of the circle, square and triangle and if we have 10 trials (n\>0),
+
+the **support** would be that each of these shapes can be picked anywhere between 0 and 10 times but the sum of the number of times the shapes are picked should add upto 10 (e.g. Circle-3, Square-5, Triangle-2)
+
+(assuming the example given above is the input data) the probabilities $p_{circle}=0.3,\: p_{square}=0.5,\: p_{triangle}=0.2$ would add up to 1.
+
+# 3. Model
+
+## 3.1 General Form
+
+For computing the multinomial regression, one of the outcomes is set as the "reference" or "baseline" level and a logistic regression is performed between all the other levels with respect to the baseline (where j \>1) , the general equation of each of these is of the form:
+
+$$
+log(\frac{\pi_{ij}}{\pi_{i1}}) = β_{0j} + β_{1j}x_{i1}+...+ β_{pj}x_{ip}
+$$
+
+where $\pi_{i1}$ is the probability of the reference level being the outcome.
+
+## 3.2 Link Function
+
+As mentioned in Section-1, multinomial regression uses **Logit** as the link function. Logit function is used for the following reasons:
+
+1.  Range of Probabilities: Logit ensures that the predicted probabilities are between 0 and 1 (Parameter requirements of selected Regression)
+2.  Symmetry: The logit function is symmetric around 0.5, making it well-suited for modeling the odds of an event occurring
+3.  Interpretability: The function provides coefficients that represent the log-odds. This makes the interpretation of coefficients more intuitive in terms of how the odds of being in a particular category change with changes in the predictor variables.
+
+## 3.3 Assumptions
+
+Multinomial Regression works on the following assumptions:
+
+1.  Response Variable: The response variable is a categorical variable with multinomial distribution.
+2.  Independence: The observations are independent of each other.
+3.  Linearity: There is a linearly mapable (via link function) relationship between the predictor variables and the response variable
