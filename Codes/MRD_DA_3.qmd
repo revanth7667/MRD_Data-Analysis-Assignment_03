@@ -21,18 +21,7 @@ library(stargazer)
 library(cvms)
 library(gridExtra)
 library(ggpubr)
-```
-
-```{r}
-#Loading the Data
-df <- read.csv("https://anlane611.github.io/ids702-fall23/DAA/DA3_Multinomial.csv")
-
-#Use Below load in case online load is not working
-#df <- read.csv("../Resources/DA3_Multinomial.csv")
-```
-
-```{r}
-summary(df)
+library(purrr)
 ```
 
 # 1. Introduction
@@ -131,3 +120,42 @@ Multinomial Regression works on the following assumptions:
 1.  Response Variable: The response variable is a categorical variable with multinomial distribution.
 2.  Independence: The observations are independent of each other.
 3.  Linearity: There is a linearly mapable (via link function) relationship between the predictor variables and the response variable
+
+# 4. Sample Execution in R
+
+## 4.1 Dataset
+
+For a sample execution of a Multinominal GLM in R we will be using a **simulated** [Dataset](https://anlane611.github.io/ids702-fall23/DAA/DA3_Multinomial.csv). Since this is a simulated Dataset, the data is clean and has no missing values, so we will not be performing any cleaning of data.
+
+The initial data has been read and stored in a variable called `df`. The dataset contains 2 predictor variable and 1 response variable,
+
+```{r}
+#Loading the Data
+df <- read.csv("https://anlane611.github.io/ids702-fall23/DAA/DA3_Multinomial.csv")
+
+#Use Below load in case online load is not working
+#df <- read.csv("../Resources/DA3_Multinomial.csv")
+```
+
+```{r, output=TRUE}
+head(df)
+```
+
+```{r}
+summary(df)
+```
+
+```{r}
+#Remove the S.No column
+df <- select(df, -X)
+```
+
+```{r, output=TRUE}
+# Get summary statistics for the selected dataset
+summary_df <- df %>%
+  purrr::map_df(~summary(.x), .id = "Variable")
+
+
+# Print the summary statistics as a table
+knitr::kable(summary_df)
+```
