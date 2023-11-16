@@ -125,9 +125,18 @@ Multinomial Regression works on the following assumptions:
 
 ## 4.1 Dataset
 
-For a sample execution of a Multinominal GLM in R we will be using a **simulated** [Dataset](https://anlane611.github.io/ids702-fall23/DAA/DA3_Multinomial.csv). Since this is a simulated Dataset, the data is clean and has no missing values, so we will not be performing any cleaning of data.
+For the sample execution of a Multinominal GLM in R we will be using a **simulated** [Dataset](https://anlane611.github.io/ids702-fall23/DAA/DA3_Multinomial.csv). Since this is a simulated Dataset, the data is clean and has no missing values, so we will not be performing any cleaning of data.
 
-The initial data has been read and stored in a variable called `df`. The dataset contains 2 predictor variable and 1 response variable,
+The initial data has been read and stored in a variable called `df`. The dataset contains the following variables:
+
+1.  `Y`- the multinomial dependent variable with three categories - 1, 2, and 3
+2.  `X1`- a continuous predictor with values in the range 11.12 to 27.66
+3.  `X2`- a categorical predictor with values 0 and 1
+
+The following steps were performed on the dataset before using it for modelling:
+
+1.  original dataset has a serial number column `X` which has been removed as it is not required.
+2.  The Variables Y and X2 were converted to the correct datatypes (INT -\> Factor)
 
 ```{r}
 #Loading the Data
@@ -137,8 +146,10 @@ df <- read.csv("https://anlane611.github.io/ids702-fall23/DAA/DA3_Multinomial.cs
 #df <- read.csv("../Resources/DA3_Multinomial.csv")
 ```
 
-```{r, output=TRUE}
-head(df)
+**Sample of Data**:
+
+```{r, output=TRUE, fig.align='center'}
+head(df,3)
 ```
 
 ```{r}
@@ -150,7 +161,12 @@ summary(df)
 df <- select(df, -X)
 ```
 
-```{r, output=TRUE}
+```{r}
+df$Y <- as.factor(df$Y)
+df$X2 <- as.factor(df$X2)
+```
+
+```{r, output=TRUE, fig.align='center'}
 # Get summary statistics for the selected dataset
 summary_df <- df %>%
   purrr::map_df(~summary(.x), .id = "Variable")
@@ -159,3 +175,98 @@ summary_df <- df %>%
 # Print the summary statistics as a table
 knitr::kable(summary_df)
 ```
+
+```{r}
+str(df)
+```
+
+```{r}
+plot_x1<- ggplot(df, aes(x = X1, fill = Y)) +
+  geom_density(alpha = 0.5) +
+  labs(x = "X1", y = "Density Distribution", fill = "Y")
+plot_x1
+```
+
+```{r}
+plot_x2 <- ggplot(df, aes(x=X2, fill=Y, label=after_stat(count)))+
+  geom_bar(alpha = 0.5)+
+  geom_text(stat='count',position=position_stack(vjust=0.5))
+plot_x2
+```
+
+```{r, output = TRUE, fig.align="center"}
+plot_3<- ggarrange(plot_x1, plot_x2,  nrow=1, common.legend = TRUE, legend="bottom")
+
+annotate_figure(plot_3, top = text_grob("Distribution of Y w.r.t X1 and X2"))
+
+```
+
+## 4.2 Model Fitting
+
+To fit the multinomial regrssion in R, we use the `multinom` function from the `nnet` package in R. the code to fit the model is as follows:
+
+```{r, output=TRUE, echo=TRUE}
+library(nnet)
+df$Y2 <- relevel(df$Y, ref=1)
+model <- multinom(Y2 ~X1+X2, data = df)
+```
+
+**Note**: Though it was not required, we created a new variable `Y2` in which we specify the level from Y which we want to use as reference level.
+
+The values which are printed when the model is fit provide information about how the model was optimized (uses maximum likelihood)
+
+## 4.3 Model Interpretation
+
+We use the `summary` function to view the details of the model fit:
+
+```{r, output=TRUE}
+summary(model)
+```
+
+The interpratation of the model summary is as follows:
+
+1.  Coefficients: These are the estimated parameters for the model. For example, the coefficient for X1 in category 2 is -0.2237668. This means for each one unit increase in X1, the log odds of Y being in category 2 versus the reference category (category 1) decrease by 0.2237668, holding all other variables constant.
+2.  Std. Errors: These are the standard errors of the coefficients. They measure the variability in the estimate for the coefficient. Smaller standard errors mean the estimate is more precise.
+3.  Residual Deviance: This is a measure of how well the model fits the data. Lower values indicate a better fit. In this case, the residual deviance is 639.7325.
+4.  AIC: This is the Akaike Information Criterion, a measure of the relative quality of statistical models. Lower values indicate a better model. In this case, the AIC is 651.7325.
+
+## 4.4 Model Assessment 
+
+```{r}
+head(model$fitted.values)
+```
+
+```{r}
+head(predict(model))
+```
+
+```{r, output=TRUE}
+confusionMatrix(predict(model), df$Y2, mode = "everything")
+```
+
+## 4.5 Model Results Visualization
+
+To visualize the results of our model, we predict the values of our response variable(Y) on generated data for the independent variables (X1, X2) such that we cover their range of possible values.
+
+We make the `predict` function generate the output as a probability so that it is easier for us to interpret.
+
+```{r}
+plot_df <- data.frame(X1=rep(seq(min(df$X1), max(df$X1), 0.1),2), X2=rep(c(0,1),166))
+plot_df$X2 <- as.factor(plot_df$X2)
+preds <- cbind(plot_df, predict(model, newdata = plot_df, type = "probs"))
+head(preds)
+```
+
+```{r}
+preds_long <- gather(preds, "level", "probability", 3:5)
+preds_long$X2 <- as.factor(preds_long$X2)
+head(preds_long)
+```
+
+```{r, output=TRUE, fig.align='center'}
+ggplot(preds_long,aes(x=X1, y=probability,col=X2))+
+  geom_line()+
+  facet_grid(level~.)
+```
+
+The graph above shows the probabilities of Y being in the possible categories given the values of the independent variables. The probabilities (colored lines) will always add up to 1 for a given value of the independent variables.
