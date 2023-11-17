@@ -83,14 +83,6 @@ This implies that the number of times each outcome $x_i$ can occur is in the ran
 
 The parameters for multinomial regression are that the number of trials "n" should be greater than 0 and the number of mutually exclusive outcomes "k" should be greater than 0 with the probabilities of these events occurring $p_i$ taking values between 0 and 1 and sum of these probabilities should add up to 1 $(\sum\limits_i p_i=1)$
 
-## 2.4 Example
-
-Example if we try to predict the chances of picking a shape out of the circle, square and triangle and if we have 10 trials (n\>0),
-
-the **support** would be that each of these shapes can be picked anywhere between 0 and 10 times but the sum of the number of times the shapes are picked should add upto 10 (e.g. Circle-3, Square-5, Triangle-2)
-
-(assuming the example given above is the input data) the probabilities $p_{circle}=0.3,\: p_{square}=0.5,\: p_{triangle}=0.2$ would add up to 1.
-
 # 3. Model
 
 ## 3.1 General Form
@@ -298,3 +290,5 @@ ggplot(preds_long,aes(x=X1, y=probability,col=X2))+
 ```
 
 The graph above shows the probabilities of Y being in the possible categories given the values of the independent variables. The probabilities (colored lines) will always add up to 1 for a given value of the independent variables.
+
+As implied by the sample interpretation of the coefficients in section 4.3, the probability of Y being category 2 (Plot 2) as compared to category 1 decreases with an increase in X1 and if X2 is 1 as compared to 0.
