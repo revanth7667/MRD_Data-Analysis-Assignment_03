@@ -46,13 +46,11 @@ Where $g(\mu)$ is the link function, $\beta_i$ are the coefficients associated w
 
 ## 1.2 Link Function
 
-A link function is used to connect the linear predictor to the expected value of the response variable i.e. it describes how the mean of the response variable is related to a linear combination of the predictor variables. The link function, denoted as g($\mu$), transforms the linear predictor into a scale appropriate for the response variable. The choice of the link function depends on the nature of the response variable and the distribution assumed for it some examples of link funtions are **Logit, Inverse, Log** etc.
+A link function is used to connect the linear predictor to the expected value of the response variable i.e. it describes how the mean of the response variable is related to a linear combination of the predictor variables. The link function, denoted as g($\mu$), transforms the linear predictor into a scale appropriate for the response variable. The choice of the link function depends on the nature of the response variable and the distribution assumed for it, some examples of link functions are **Logit, Inverse, Log** etc.
 
 ## 1.3 GLM: Multinomial Regression
 
-Multinomial Regression is used when the response variable is categorical in nature and has more than 2 levels (categories). The link function used in Multinominal Regression is a **Logit** function which is defined as follows:
-
-$$logit(p) = log(\frac{p}{1 - p})$$
+Multinomial Regression is used when the response variable is categorical in nature with a multinomial distribution and has more than 2 levels (categories). The link function used in Multinomial Regression is a **Logit** function.
 
 some sample research questions which can be answered by multinomial regression include:
 
@@ -83,7 +81,7 @@ This implies that the number of times each outcome $x_i$ can occur is in the ran
 
 ## 2.3 Parameters
 
-The parameters for multinomial regression are that the number of trials "n" should be greater than 0 and the number of mutually exclusive events "k" should be greater than 0 with the probabilities of these events occurring $p_i$ taking values between 0 and 1 and sum of these probabilities should add up to 1 $(\sum\limits_i p_i=1)$
+The parameters for multinomial regression are that the number of trials "n" should be greater than 0 and the number of mutually exclusive outcomes "k" should be greater than 0 with the probabilities of these events occurring $p_i$ taking values between 0 and 1 and sum of these probabilities should add up to 1 $(\sum\limits_i p_i=1)$
 
 ## 2.4 Example
 
@@ -103,11 +101,15 @@ $$
 log(\frac{\pi_{ij}}{\pi_{i1}}) = β_{0j} + β_{1j}x_{i1}+...+ β_{pj}x_{ip}
 $$
 
-where $\pi_{i1}$ is the probability of the reference level being the outcome.
+where $\pi_{i1}$ is the probability of the reference level being the outcome and $\pi_{ij}$ is the probability of the selected level being the outcome.
 
 ## 3.2 Link Function
 
-As mentioned in Section-1, multinomial regression uses **Logit** as the link function. Logit function is used for the following reasons:
+Multinomial regression uses **Logit** as the link function, which is given by the formula:
+
+$$logit(p) = log(\frac{p}{1 - p})$$
+
+Logit function is used in multinomial regression for the following reasons:
 
 1.  Range of Probabilities: Logit ensures that the predicted probabilities are between 0 and 1 (Parameter requirements of selected Regression)
 2.  Symmetry: The logit function is symmetric around 0.5, making it well-suited for modeling the odds of an event occurring
@@ -119,15 +121,15 @@ Multinomial Regression works on the following assumptions:
 
 1.  Response Variable: The response variable is a categorical variable with multinomial distribution.
 2.  Independence: The observations are independent of each other.
-3.  Linearity: There is a linearly mapable (via link function) relationship between the predictor variables and the response variable
+3.  Linearity: There is a linearly mapable (via link function) relationship between the predictor variables and the probability of response variable outcomes.
 
 # 4. Sample Execution in R
 
 ## 4.1 Dataset
 
-For the sample execution of a Multinominal GLM in R we will be using a **simulated** [Dataset](https://anlane611.github.io/ids702-fall23/DAA/DA3_Multinomial.csv). Since this is a simulated Dataset, the data is clean and has no missing values, so we will not be performing any cleaning of data.
+For the sample execution of a Multinomial GLM in R we will be using a **simulated** [Dataset](https://anlane611.github.io/ids702-fall23/DAA/DA3_Multinomial.csv). Since this is a simulated Dataset, the data is clean and has no missing values, so we will not be performing any cleaning of data.
 
-The initial data has been read and stored in a variable called `df`. The dataset contains the following variables:
+The dataset has been loaded into a dataframe `df` and contains **344** observations of the following 3 variables:
 
 1.  `Y`- the multinomial dependent variable with three categories - 1, 2, and 3
 2.  `X1`- a continuous predictor with values in the range 11.12 to 27.66
@@ -146,9 +148,7 @@ df <- read.csv("https://anlane611.github.io/ids702-fall23/DAA/DA3_Multinomial.cs
 #df <- read.csv("../Resources/DA3_Multinomial.csv")
 ```
 
-**Sample of Data**:
-
-```{r, output=TRUE, fig.align='center'}
+```{r}
 head(df,3)
 ```
 
@@ -162,9 +162,12 @@ df <- select(df, -X)
 ```
 
 ```{r}
+#Converting Y and X2 to factors
 df$Y <- as.factor(df$Y)
 df$X2 <- as.factor(df$X2)
 ```
+
+The summary statistics of the data is as follows:
 
 ```{r, output=TRUE, fig.align='center'}
 # Get summary statistics for the selected dataset
@@ -176,8 +179,17 @@ summary_df <- df %>%
 knitr::kable(summary_df)
 ```
 
+Note: NA is displayed in the summary statistics columns for Y and X2 as they are categorical variables.
+
 ```{r}
 str(df)
+```
+
+```{r}
+plot_y <- ggplot(df, aes(x=Y, fill=Y, label=after_stat(count)) )+
+  geom_bar(alpha = 0.5)+
+  geom_text(stat='count',position=position_stack(vjust=0.5))
+plot_y
 ```
 
 ```{r}
@@ -194,16 +206,19 @@ plot_x2 <- ggplot(df, aes(x=X2, fill=Y, label=after_stat(count)))+
 plot_x2
 ```
 
-```{r, output = TRUE, fig.align="center"}
-plot_3<- ggarrange(plot_x1, plot_x2,  nrow=1, common.legend = TRUE, legend="bottom")
+The distributions of Y are as follows:
 
-annotate_figure(plot_3, top = text_grob("Distribution of Y w.r.t X1 and X2"))
+```{r, output = TRUE, fig.align="center"}
+plot_3<- ggarrange(plot_y, plot_x1, plot_x2,  nrow=1, common.legend = TRUE, legend="bottom")
+
+plot_4 <- annotate_figure(plot_3, top = text_grob("Counts of Y, Density Distribution of Y w.r.t X1 and Counts of Y w.r.t X2"))
+plot_4
 
 ```
 
 ## 4.2 Model Fitting
 
-To fit the multinomial regrssion in R, we use the `multinom` function from the `nnet` package in R. the code to fit the model is as follows:
+We use the `multinom` function from the `nnet` package in R to fit the multinomial model as follows:
 
 ```{r, output=TRUE, echo=TRUE}
 library(nnet)
@@ -211,24 +226,37 @@ df$Y2 <- relevel(df$Y, ref=1)
 model <- multinom(Y2 ~X1+X2, data = df)
 ```
 
-**Note**: Though it was not required, we created a new variable `Y2` in which we specify the level from Y which we want to use as reference level.
-
-The values which are printed when the model is fit provide information about how the model was optimized (uses maximum likelihood)
+Though it was not required, we created a new variable `Y2` in which we specify the category we want to use as reference level. The values which are printed when the model is fit provide information about how the model was optimized (uses maximum likelihood)
 
 ## 4.3 Model Interpretation
 
 We use the `summary` function to view the details of the model fit:
 
-```{r, output=TRUE}
+```{r, output=TRUE, echo=TRUE}
 summary(model)
 ```
 
-The interpratation of the model summary is as follows:
+For a multinomial logistic regression, the coefficients represent the log-odds of the outcomes relative to a reference category. Sample interpretation of the model summary coefficientsis for Y=2 with comparison for Y=1 as reference category is as follows:
 
-1.  Coefficients: These are the estimated parameters for the model. For example, the coefficient for X1 in category 2 is -0.2237668. This means for each one unit increase in X1, the log odds of Y being in category 2 versus the reference category (category 1) decrease by 0.2237668, holding all other variables constant.
-2.  Std. Errors: These are the standard errors of the coefficients. They measure the variability in the estimate for the coefficient. Smaller standard errors mean the estimate is more precise.
-3.  Residual Deviance: This is a measure of how well the model fits the data. Lower values indicate a better fit. In this case, the residual deviance is 639.7325.
-4.  AIC: This is the Akaike Information Criterion, a measure of the relative quality of statistical models. Lower values indicate a better model. In this case, the AIC is 651.7325.
+1.  raw-coefficients: For each one unit increase in X1, the log odds of Y being in category 2 versus the reference category (category 1) decreases by 0.2237668, holding all other variables constant.
+
+2.  A one unit increase in X1 is associated with a \~20% decrease of the odds of the outcome being category 2 as compared to category 1. The value is derived using the following calculation:
+
+    $$
+    e^{-0.2237668}=0.8 ~ | 1-0.8 = 0.2 ~| 20\%
+    $$
+
+3.   The odds of being in the category 2 vs Category 1 will decrease by 1.29 if moving from 0 to 1 for X2
+
+4.  using similar calcuation as in point 2, The odds of being in category 2 vs Category 1 are \~73% lower if X2 is 1 as compared to 0.
+
+5.  The intercept is 3.37, so the baseline log odds of Y=2 vs Y=1 is 3.37.
+
+Other information in Summary:
+
+1.  Std. Errors: They measure the variability in the estimate for the coefficient. Smaller standard errors mean the estimate is more precise.
+2.  Residual Deviance: This is a measure of how well the model fits the data. Lower values indicate a better fit
+3.  AIC: This is a measure of the relative quality of statistical models. Lower values indicate a better model. .
 
 ## 4.4 Model Assessment 
 
