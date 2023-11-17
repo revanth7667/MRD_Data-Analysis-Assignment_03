@@ -22,6 +22,7 @@ library(cvms)
 library(gridExtra)
 library(ggpubr)
 library(purrr)
+library(knitr)
 ```
 
 # 1. Introduction
@@ -161,6 +162,8 @@ df$X2 <- as.factor(df$X2)
 
 The summary statistics of the data is as follows:
 
+\tiny
+
 ```{r, output=TRUE, fig.align='center'}
 # Get summary statistics for the selected dataset
 summary_df <- df %>%
@@ -170,6 +173,8 @@ summary_df <- df %>%
 # Print the summary statistics as a table
 knitr::kable(summary_df)
 ```
+
+\normalsize
 
 Note: NA is displayed in the summary statistics columns for Y and X2 as they are categorical variables.
 
@@ -200,7 +205,7 @@ plot_x2
 
 The distributions of Y are as follows:
 
-```{r, output = TRUE, fig.align="center"}
+```{r, output = TRUE, fig.align="center", fig.height=3, fig.width=7}
 plot_3<- ggarrange(plot_y, plot_x1, plot_x2,  nrow=1, common.legend = TRUE, legend="bottom")
 
 plot_4 <- annotate_figure(plot_3, top = text_grob("Counts of Y, Density Distribution of Y w.r.t X1 and Counts of Y w.r.t X2"))
@@ -212,11 +217,19 @@ plot_4
 
 We use the `multinom` function from the `nnet` package in R to fit the multinomial model as follows:
 
+\tiny
+
+\centering
+
 ```{r, output=TRUE, echo=TRUE}
 library(nnet)
 df$Y2 <- relevel(df$Y, ref=1)
 model <- multinom(Y2 ~X1+X2, data = df)
 ```
+
+\raggedright
+
+\normalsize
 
 Though it was not required, we created a new variable `Y2` in which we specify the category we want to use as reference level. The values which are printed when the model is fit provide information about how the model was optimized (uses maximum likelihood)
 
@@ -224,9 +237,17 @@ Though it was not required, we created a new variable `Y2` in which we specify t
 
 We use the `summary` function to view the details of the model fit:
 
+\tiny
+
+\centering
+
 ```{r, output=TRUE, echo=TRUE}
 summary(model)
 ```
+
+\raggedright
+
+\normalsize
 
 For a multinomial logistic regression, the coefficients represent the log-odds of the outcomes relative to a reference category. Sample interpretation of the model summary coefficientsis for Y=2 with comparison for Y=1 as reference category is as follows:
 
@@ -238,7 +259,7 @@ For a multinomial logistic regression, the coefficients represent the log-odds o
     e^{-0.2237668}=0.8 ~ | 1-0.8 = 0.2 ~| 20\%
     $$
 
-3.   The odds of being in the category 2 vs Category 1 will decrease by 1.29 if moving from 0 to 1 for X2
+3.  The odds of being in the category 2 vs Category 1 will decrease by 1.29 if moving from 0 to 1 for X2
 
 4.  using similar calcuation as in point 2, The odds of being in category 2 vs Category 1 are \~73% lower if X2 is 1 as compared to 0.
 
@@ -250,7 +271,24 @@ Other information in Summary:
 2.  Residual Deviance: This is a measure of how well the model fits the data. Lower values indicate a better fit
 3.  AIC: This is a measure of the relative quality of statistical models. Lower values indicate a better model. .
 
-## 4.4 Model Assessment 
+## 4.4 Model Assessment
+
+We assess the model in the following categories:
+
+### 4.4.1 Assumptions
+
+1.  Linearity: can be verified by fitting separate Logistic Regression Models for each of the combinations
+2.  Independence: is verified by study design or domain knowledge
+
+### 4.4.2 Model Fit
+
+To assess the model fit we use metric based on the likelihood like **Deviance** and **AIC** which can be viewed in the model summary as explained in section 4.3
+
+### 4.4.3 Predictions
+
+To asses the predictions we use the `confusionMatrix` function from `caret` package to study different parameters like sensitivity, Kappa score, F1 score etc.
+
+To generate these values, we make the model predict the outcome variable based on the initial dataset and compare it against the actual values of the response variable.
 
 ```{r}
 head(model$fitted.values)
@@ -260,9 +298,17 @@ head(model$fitted.values)
 head(predict(model))
 ```
 
-```{r, output=TRUE}
+\centering
+
+\tiny
+
+```{r, echo=TRUE, output=TRUE}
 confusionMatrix(predict(model), df$Y2, mode = "everything")
 ```
+
+\raggedright
+
+\normalsize
 
 ## 4.5 Model Results Visualization
 
@@ -283,7 +329,7 @@ preds_long$X2 <- as.factor(preds_long$X2)
 head(preds_long)
 ```
 
-```{r, output=TRUE, fig.align='center'}
+```{r, output = TRUE, fig.align="center", fig.height=3, fig.width=7}
 ggplot(preds_long,aes(x=X1, y=probability,col=X2))+
   geom_line()+
   facet_grid(level~.)
