@@ -88,7 +88,7 @@ The parameters for multinomial regression are that the number of trials "n" shou
 
 ## 3.1 General Form
 
-For computing the multinomial regression, one of the outcomes is set as the "reference" or "baseline" level and a logistic regression is performed between all the other levels with respect to the baseline (where j \>1) , the general equation of each of these is of the form:
+For computing the multinomial regression, one of the outcomes is set as the "reference" or "baseline" level and a logistic regression is performed between all the other levels with respect to the baseline (where j \>=2) , the general equation of each of these is of the form:
 
 $$
 log(\frac{\pi_{ij}}{\pi_{i1}}) = β_{0j} + β_{1j}x_{i1}+...+ β_{pj}x_{ip}
@@ -259,9 +259,9 @@ For a multinomial logistic regression, the coefficients represent the log-odds o
     e^{-0.2237668}=0.8 ~ | 1-0.8 = 0.2 ~| 20\%
     $$
 
-3.  The odds of being in the category 2 vs Category 1 will decrease by 1.29 if moving from 0 to 1 for X2
+3.  The log odds of being in the category 2 vs Category 1 will decrease by 1.29 if moving from 0 to 1 for X2
 
-4.  using similar calcuation as in point 2, The odds of being in category 2 vs Category 1 are \~73% lower if X2 is 1 as compared to 0.
+4.  using similar calculation as in point 2, The odds of being in category 2 vs Category 1 are \~73% lower if X2 is 1 as compared to 0.
 
 5.  The intercept is 3.37, so the baseline log odds of Y=2 vs Y=1 is 3.37.
 
@@ -278,11 +278,11 @@ We assess the model in the following categories:
 ### 4.4.1 Assumptions
 
 1.  Linearity: can be verified by fitting separate Logistic Regression Models for each of the combinations
-2.  Independence: is verified by study design or domain knowledge
+2.  Independence: is verified by study design and domain knowledge
 
 ### 4.4.2 Model Fit
 
-To assess the model fit we use metric based on the likelihood like **Deviance** and **AIC** which can be viewed in the model summary as explained in section 4.3
+To assess the model fit we use metrics based on the likelihood like **Deviance** and **AIC** which can be viewed and interpreted in the model summary as explained in section 4.3
 
 ### 4.4.3 Predictions
 
@@ -310,6 +310,18 @@ confusionMatrix(predict(model), df$Y2, mode = "everything")
 
 \normalsize
 
+Interpretation of selected statistics from the above results:
+
+1.  Confusion Matrix : Shows the comparison of the actual values vs the values predicted by the model. ideally the left diagonal values should be maximum and other elements should be minimum.
+2.  Accuracy: Our model has an accuracy of approximately 53% which is comparatively low
+3.  Kappa Score : It calculates the degree of agreement between the model's predictions and the actual class labels while accounting for the possibility of chance agreement. a score of \~0.19 indicates that the model is better than random chance prediction, however the usual desirable range is atleast 0.4+
+4.  Response Variable category-wise statistics
+    1.  Sensitivity: measure of how many true cases are identified as true, while the scores are low for category 1 and 3, it is very low for category 2
+    2.  Specificity: measure of how many negative cases are identified as negative, here an inverse pattern to sensitivity is seen where the score is good for category 2 but lower for category 1 and 3
+    3.  F1 Score: is a measure of overall accuracy which takes into account the precision and recall, while it is in acceptable range for category 1 and category 3 , it is very low for category 2
+
+Overall the model isn't very strong and the possible reasons maybe the data imbalance and low sample size.
+
 ## 4.5 Model Results Visualization
 
 To visualize the results of our model, we predict the values of our response variable(Y) on generated data for the independent variables (X1, X2) such that we cover their range of possible values.
@@ -335,6 +347,6 @@ ggplot(preds_long,aes(x=X1, y=probability,col=X2))+
   facet_grid(level~.)
 ```
 
-The graph above shows the probabilities of Y being in the possible categories given the values of the independent variables. The probabilities (colored lines) will always add up to 1 for a given value of the independent variables.
+The graph above shows the probabilities of Y being in the possible categories given the values of the independent variables. The probabilities (colored lines) will always add up to 1 for given values of the independent variables.
 
 As implied by the sample interpretation of the coefficients in section 4.3, the probability of Y being category 2 (Plot 2) as compared to category 1 decreases with an increase in X1 and if X2 is 1 as compared to 0.
